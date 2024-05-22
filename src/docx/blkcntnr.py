@@ -13,9 +13,11 @@ from typing import TYPE_CHECKING, Iterator
 from typing_extensions import TypeAlias
 
 from docx.oxml.table import CT_Tbl
+from docx.oxml.ns import qn
 from docx.oxml.text.paragraph import CT_P
 from docx.shared import StoryChild
 from docx.text.paragraph import Paragraph
+from docx.api import element
 
 if TYPE_CHECKING:
     import docx.types as t
@@ -95,6 +97,18 @@ class BlockItemContainer(StoryChild):
 
         return [Table(tbl, self) for tbl in self._element.tbl_lst]
 
+    @property
+    def elements(self):
+        """
+        A list containing the elements in this container (paragraph and tables), in document order.
+        """
+        return [element(item,self.part) for item in self._element.getchildren()]
+
+
+    @property
+    def abstractNumIds(self):
+        return [numId for numId in self.part.numbering_part.element.iterchildren(qn('w:abstractNum'))]
+        
     def _add_paragraph(self):
         """Return paragraph newly added to the end of the content in this container."""
         return Paragraph(self._element.add_p(), self)

@@ -6,7 +6,9 @@ from typing import TYPE_CHECKING, Callable, cast
 
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_ROW_HEIGHT_RULE, WD_TABLE_DIRECTION
 from docx.exceptions import InvalidSpanError
+from .ns import nsdecls, qn, nsmap
 from docx.oxml.ns import nsdecls, qn
+from . import OxmlElement
 from docx.oxml.parser import parse_xml
 from docx.oxml.shared import CT_DecimalNumber
 from docx.oxml.simpletypes import (
@@ -15,6 +17,7 @@ from docx.oxml.simpletypes import (
     ST_TblWidth,
     ST_TwipsMeasure,
     XsdInt,
+    ST_String
 )
 from docx.oxml.text.paragraph import CT_P
 from docx.oxml.xmlchemy import (
@@ -240,6 +243,21 @@ class CT_Tbl(BaseOxmlElement):
         xml += "  </w:tblGrid>\n"
         return xml
 
+    @property
+    def _section(self):
+        body = self.getparent()
+        sections = body.findall('.//w:sectPr', {'w':nsmap['w']})
+        if len(sections) == 1:
+            return sections[0]
+        else:
+            tbl_index = body.index(self)
+            for i,sect in enumerate(sections):
+                if i == len(sections) - 1 :
+                    return sect
+                else:
+                    if body.index(sect.getparent().getparent()) > tbl_index:
+                        return sect
+
     @classmethod
     def _trs_xml(cls, row_count: int, col_count: int, col_width: Length) -> str:
         return f"  <w:tr>\n{cls._tcs_xml(col_count, col_width)}  </w:tr>\n" * row_count
@@ -293,6 +311,8 @@ class CT_TblLayoutType(BaseOxmlElement):
         "w:type", ST_TblLayoutType
     )
 
+class CT_TblBoarders(BaseOxmlElement):
+    pass
 
 class CT_TblPr(BaseOxmlElement):
     """``<w:tblPr>`` element, child of ``<w:tbl>``, holds child elements that define
@@ -332,6 +352,9 @@ class CT_TblPr(BaseOxmlElement):
     bidiVisual: CT_OnOff | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
         "w:bidiVisual", successors=_tag_seq[4:]
     )
+    tblW =ZeroOrOne ('w:tblW', successors=('w:tblPr',))
+    tblCellMar = ZeroOrOne('w:tblCellMar', successors=('w:tblPr',))
+    tblBorders = ZeroOrOne('w:tblBorders', successors=('w:tblPr',))
     jc: CT_Jc | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
         "w:jc", successors=_tag_seq[8:]
     )
@@ -417,6 +440,28 @@ class CT_TblWidth(BaseOxmlElement):
         self.type = "dxa"
         self.w = Emu(value).twips
 
+class CT_TcBorders(BaseOxmlElement):
+    """
+    <w:tcBorders> element
+    """
+    top = ZeroOrOne('w:top')
+    start = ZeroOrOne('w:start')
+    bottom = ZeroOrOne('w:bottom',successors=('w:tblPr',) )
+    end = ZeroOrOne('w:end')
+
+
+    def new(cls):
+        """
+        Return a new ``<w:tcBorders>`` element
+        """
+        return parse_xml(
+            '<w:tcBorders %s>\n'
+            '</w:tcBorders>' % nsdecls('w')
+        )
+
+    def add_bottom_border(self, val, sz):
+        bottom = CT_Bottom.new ( val, sz)
+        return self._insert_bottom(bottom)
 
 class CT_Tc(BaseOxmlElement):
     """`w:tc` table cell element."""
@@ -818,6 +863,7 @@ class CT_TcPr(BaseOxmlElement):
     gridSpan: CT_DecimalNumber | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
         "w:gridSpan", successors=_tag_seq[3:]
     )
+    tcBorders = ZeroOrOne('w:tcBorders', successors = ('w:tcPr',))
     vMerge: CT_VMerge | None = ZeroOrOne(  # pyright: ignore[reportAssignmentType]
         "w:vMerge", successors=_tag_seq[5:]
     )
@@ -975,3 +1021,30 @@ class CT_VMerge(BaseOxmlElement):
     val: str | None = OptionalAttribute(  # pyright: ignore[reportAssignmentType]
         "w:val", ST_Merge, default=ST_Merge.CONTINUE
     )
+
+class CT_TblMar(BaseOxmlElement):
+    """
+    ``<w:tblCellMar>`` element
+    """
+    left = ZeroOrOne('w:left', successors=('w:tblCellMar',)) 
+    right = ZeroOrOne('w:write', successors=('w:tblCellMar',))
+
+
+class CT_Bottom(BaseOxmlElement):
+    """
+    <w:bottom> element
+    """
+    val= OptionalAttribute('w:val', ST_String)
+    sz= OptionalAttribute('w:sz', ST_String)
+    space = OptionalAttribute('w:space', ST_String)
+    color = OptionalAttribute('w:color', ST_String)
+
+    @classmethod
+    def new(cls, val, sz):
+        bottom = OxmlElement('w:bottom')
+        bottom.val = val
+        bottom.sz = sz 
+        bottom.space = "0"
+        bottom.color = "auto"
+
+        return bottom 

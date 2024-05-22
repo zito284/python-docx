@@ -12,6 +12,8 @@ from docx.parts.numbering import NumberingPart
 from docx.parts.settings import SettingsPart
 from docx.parts.story import StoryPart
 from docx.parts.styles import StylesPart
+from docx.parts.comments import CommentsPart
+from docx.parts.footnotes import FootnotesPart
 from docx.shape import InlineShapes
 from docx.shared import lazyproperty
 
@@ -147,3 +149,33 @@ class DocumentPart(StoryPart):
             styles_part = StylesPart.default(package)
             self.relate_to(styles_part, RT.STYLES)
             return styles_part
+
+    @lazyproperty
+    def comments_part(self):
+        """
+        A |Comments| object providing read/write access to the core
+        properties of this document.
+        """
+        # return self.package._comments_part
+
+    @property
+    def _comments_part(self):
+        try:
+            return self.part_related_by(RT.COMMENTS)
+        except KeyError:
+            comments_part = CommentsPart.default(self) 
+            self.relate_to(comments_part, RT.COMMENTS)
+            return comments_part
+
+    @property
+    def _footnotes_part(self):
+        """
+        |FootnotesPart| object related to this package. Creates
+        a default Comments part if one is not present.
+        """
+        try:
+            return self.part_related_by(RT.FOOTNOTES)
+        except KeyError:
+            footnotes_part = FootnotesPart.default(self)
+            self.relate_to(footnotes_part, RT.FOOTNOTES)
+            return  footnotes_part
