@@ -98,14 +98,6 @@ class BlockItemContainer(StoryChild):
         return [Table(tbl, self) for tbl in self._element.tbl_lst]
 
     @property
-    def elements(self):
-        """
-        A list containing the elements in this container (paragraph and tables), in document order.
-        """
-        return [element(item,self.part) for item in self._element.getchildren()]
-
-
-    @property
     def abstractNumIds(self):
         return [numId for numId in self.part.numbering_part.element.iterchildren(qn('w:abstractNum'))]
         

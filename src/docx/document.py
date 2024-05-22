@@ -184,10 +184,6 @@ class Document(ElementProxy):
         return self._body.tables
 
     @property
-    def elements(self):
-        return self._body.elements
-
-    @property
     def abstractNumIds(self):
         """
         Returns list of all the 'w:abstarctNumId' of this document

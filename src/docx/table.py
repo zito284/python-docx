@@ -12,7 +12,6 @@ from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
 from docx.oxml.simpletypes import ST_Merge
 from docx.oxml.table import CT_TblGridCol
 from docx.shared import Inches, Parented, StoryChild, lazyproperty
-from .section import Section
 
 if TYPE_CHECKING:
     import docx.types as t
@@ -54,10 +53,6 @@ class Table(StoryChild):
             if gridCol.w is not None:
                 tc.width = gridCol.w
         return _Row(tr, self)
-
-    @property
-    def section(self):
-        return Section(self._element._section, self.part)
 
     @property
     def alignment(self) -> WD_TABLE_ALIGNMENT | None:
