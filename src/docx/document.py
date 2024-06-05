@@ -172,6 +172,13 @@ class Document(ElementProxy):
         """A |Styles| object providing access to the styles in this document."""
         return self._part.styles
 
+    def numbering(self):
+        """
+        A "Provides access to numbering part
+        """
+        x=self._part.numbering_part
+        return self._part.numbering_part
+
     @property
     def tables(self) -> List[Table]:
         """All |Table| instances in the document, in document order.
@@ -186,7 +193,7 @@ class Document(ElementProxy):
     @property
     def abstractNumIds(self):
         """
-        Returns list of all the 'w:abstarctNumId' of this document
+        Returns list of all the 'w:abstractNumId' of this document
         """
         return self._body.abstractNumIds
 

@@ -6,7 +6,7 @@ from typing import cast
 
 from docx.oxml.ns import qn
 from docx.oxml.parser import OxmlElement
-from docx.oxml.simpletypes import ST_DecimalNumber, ST_OnOff, ST_String
+from docx.oxml.simpletypes import ST_DecimalNumber, ST_OnOff, ST_String, ST_LongHexNumber
 from docx.oxml.xmlchemy import BaseOxmlElement, OptionalAttribute, RequiredAttribute
 
 
@@ -51,3 +51,10 @@ class CT_String(BaseOxmlElement):
         elm = cast(CT_String, OxmlElement(nsptagname))
         elm.val = val
         return elm
+
+class CT_LongHexNumber(BaseOxmlElement):
+    """
+    ``<w:suff>`` element, which specifies the form of the space
+    between a list number and the list paragraph
+    """
+    val = RequiredAttribute('w:val', ST_LongHexNumber )

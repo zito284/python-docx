@@ -179,3 +179,13 @@ class DocumentPart(StoryPart):
             footnotes_part = FootnotesPart.default(self)
             self.relate_to(footnotes_part, RT.FOOTNOTES)
             return  footnotes_part
+    
+    @property
+    def lists(self):
+        """
+        A list of |ListParagraph| instances corresponding to lists formed by
+        paragraphs sharing the same numId in the document, in document order.
+        Note that list paragraphs within revision marks such as inserted or
+        deleted do not appear in this list.
+        """
+        return self.body.lists

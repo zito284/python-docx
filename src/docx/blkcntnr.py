@@ -100,6 +100,7 @@ class BlockItemContainer(StoryChild):
     @property
     def abstractNumIds(self):
         return [numId for numId in self.part.numbering_part.element.iterchildren(qn('w:abstractNum'))]
+
         
     def _add_paragraph(self):
         """Return paragraph newly added to the end of the content in this container."""

@@ -20,6 +20,9 @@ class NumberingPart(XmlPart):
         (<w:num> element proxies) for this numbering part."""
         return _NumberingDefinitions(self._element)
 
+    def add_num(self, abstractNum_id, restart=False):
+        return self._numbering.add_num(abstractNum_id, restart).numId
+
 
 class _NumberingDefinitions:
     """Collection of |_NumberingDefinition| instances corresponding to the ``<w:num>``

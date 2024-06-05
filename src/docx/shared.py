@@ -382,3 +382,15 @@ class TextAccumulator:
         text = self._separator.join(self._texts)
         self._texts.clear()
         yield text
+
+class IntOrPercent(object):
+    """
+    Integer or a percentage value
+    """
+    def __init__(self, str):
+        if str[-1] == "%":
+            self.is_percent = True
+            self.value = int(str[:-1])
+        else:
+            self.is_percent = False
+            self.value = int(str)
